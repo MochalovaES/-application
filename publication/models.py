@@ -27,7 +27,7 @@ class Post(models.Model):
 class Comment(models.Model):
     """Создание модели отзыва"""
     author = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Автор отзыва', **NULLABLE)
-    post = models.ForeignKey(Post, on_delete=models.CASCADE, verbose_name='Пост')
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, verbose_name='Пост', **NULLABLE)
     text = models.TextField(verbose_name='Текст коммента')
     created_at = models.DateTimeField(default=timezone.now, verbose_name='Дата создания')
     edited_at = models.DateTimeField(default=timezone.now, verbose_name='Дата редактирования')

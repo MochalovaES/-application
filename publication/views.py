@@ -20,11 +20,20 @@ class PostViewSet(viewsets.ModelViewSet):
             permission_classes = [IsAuthenticated, IsOwner | IsAdmin]
         return [permission() for permission in permission_classes]
 
+    def get_serializer(self, *args, **kwargs):
+        """Передача контекста в сериализатор"""
+        kwargs['context'] = self.get_serializer_context()
+        return super().get_serializer(*args, **kwargs)
+
+    def get_serializer_context(self):
+        """Добавление дополнительного контекста в сериализатор"""
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
+
     def perform_create(self, serializer):
         """Автоматическое сохранение владельца при создании объекта"""
-        new_ad = serializer.save()
-        new_ad.author = self.request.user
-        new_ad.save()
+        serializer.save(author=self.request.user)
 
 
 class CommentViewSet(viewsets.ModelViewSet):

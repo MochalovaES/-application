@@ -1,7 +1,8 @@
 from rest_framework import serializers
 
 from publication.models import Comment, Post
-from publication.validators import TitleValidator, AutorBirthDayValidator
+from publication.validators import TitleValidator
+from datetime import date
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -17,10 +18,15 @@ class PostSerializer(serializers.ModelSerializer):
     author_email = serializers.CharField(source="author.email", read_only=True)
     author_birth_day = serializers.CharField(source="author.birth_day", read_only=True)
 
-    # author_birth_day = serializers.DateField(validators=[AutorBirthDayValidator(field='autor.birth_day')])
-
     class Meta:
         model = Post
         fields = '__all__'
-        validators = [AutorBirthDayValidator(field='autor.birth_day'),
-                      TitleValidator(field='title')]
+        validators = [TitleValidator(field='title')]
+
+    def validate(self, data):
+        author = self.instance.author if self.instance else self.context['request'].user
+        birth_day = author.birth_day
+        age = (date.today() - birth_day).days // 365
+        if age < 18:
+            raise serializers.ValidationError({'author': 'Автор поста не достиг возраста 18 лет.'})
+        return data
